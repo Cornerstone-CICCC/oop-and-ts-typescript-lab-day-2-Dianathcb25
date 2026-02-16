@@ -9,26 +9,59 @@
 // 6. Implement a method `updateItem` that updates an item by its property value.
 
 class MyStorage<T, U> {
-  items = []
+  items: T[] = [];
 
-  addItem(item) {
+  addItem(item: T): string {
+    this.items.push(item);
 
+    if (typeof item === 'object' && item !== null && 'name' in item) {
+      return `User ${(item as any).name} added.`;
+    }
+    return `${String(item)} added to storage.`;
   }
 
-  getItems() {
-
+  getItems(): T[] {
+    return [...this.items];
   }
 
-  removeItem(id) {
+  removeItem(id: T): string {
+    const index = this.items.indexOf(id);
+    if (index === -1) return `${String(id)} not found in storage.`;
 
+    this.items.splice(index, 1);
+    return `${String(id)} removed from storage.`;
   }
 
-  findItem(prop, val) {
-
+  findItem(prop: keyof T, val: any): T | string {
+    const foundItem = this.items.find((item) => {
+      if (item && typeof item === 'object') {
+        return (item as any)[prop] === val;
+      }
+      return false;
+    });
+    return foundItem ?? 'Item not found.';
   }
 
-  updateItem(prop, id, update) {
+  updateItem(prop: keyof T, id: any, update: Partial<T>): string {
+    const index = this.items.findIndex((item) => {
+      if (item && typeof item === 'object') {
+        return (item as any)[prop] === id;
+      }
+      return false;
+    });
 
+    if (index === -1) return 'Item not found.';
+
+    const current = this.items[index];
+    if (typeof current === 'object' && current !== null) {
+      this.items[index] = { ...current, ...update };
+
+      const updated = this.items[index] as any;
+      return updated.name
+        ? `${updated.name} updated successfully`
+        : 'Item updated successfully.';
+    }
+    return 'Cannot update non-object item.';
   }
 }
 
@@ -43,9 +76,9 @@ console.log(numberStrStorage.getItems()); // [20]
 
 const userStorage = new MyStorage<{ id: number; name: string }, string>();
 
-console.log(userStorage.addItem({ id: 1, name: "Alice" })); // "User Alice added."
-console.log(userStorage.addItem({ id: 2, name: "Bob" })); // "User Bob added."
+console.log(userStorage.addItem({ id: 1, name: 'Alice' })); // "User Alice added."
+console.log(userStorage.addItem({ id: 2, name: 'Bob' })); // "User Bob added."
 console.log(userStorage.getItems()); // [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }]
-console.log(userStorage.findItem("name", "Alice")); // { id: 1, name: "Alice" }
-console.log(userStorage.updateItem("id", 1, { id: 1, name: "Alice Updated" })); // "Alice updated successfully."
+console.log(userStorage.findItem('name', 'Alice')); // { id: 1, name: "Alice" }
+console.log(userStorage.updateItem('id', 1, { id: 1, name: 'Alice Updated' })); // "Alice updated successfully."
 console.log(userStorage.getItems()); // [{ id: 1, name: "Alice Updated" }, { id: 2, name: "Bob" }]

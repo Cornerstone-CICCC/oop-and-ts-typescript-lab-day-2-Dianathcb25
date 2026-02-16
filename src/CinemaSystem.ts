@@ -9,31 +9,93 @@
 // 6. Create a function called checkSeatAvailability which returns true if a seat is available and false otherwise.
 
 enum MovieGenre {
-  Action,
+  Action = 'Action',
+  Comedy = 'Comedy',
+  SciFi = 'Scifi',
+  Romance = 'Romance',
+  Animation = 'Animation',
   // add 4 more
 }
 
-type Seat = [string, number]
+type Seat = [string, number];
 
 type Movie = {
-
-}
+  movieId: number;
+  title: string;
+  genre: MovieGenre;
+  availableSeats: Seat[];
+};
 
 const movies: Movie[] = [];
 
-function addMovie(movieId, title, genre, availableSeats) {
-
+function findMovie(movieId: number): Movie | undefined {
+  return movies.find((m) => m.movieId === movieId);
 }
 
-function bookSeat(movieId, rowLetter, seatNumber) {
-
+function addMovie(
+  movieId: number,
+  title: string,
+  genre: MovieGenre,
+  availableSeats: Seat[],
+): Movie | string {
+  const newMovie: Movie = {
+    movieId,
+    title,
+    genre,
+    availableSeats,
+  };
+  movies.push(newMovie);
+  return newMovie;
 }
 
-function checkSeatAvailability(movieId, rowLetter, seatNumber) {
+function bookSeat(
+  movieId: number,
+  rowLetter: string,
+  seatNumber: number,
+): string {
+  const movie = findMovie(movieId);
+  if (!movie) return 'Movie is not found.';
 
+  const seatIndex = movie.availableSeats.findIndex(
+    (seat) => seat[0] === rowLetter && seat[1] === seatNumber,
+  );
+
+  if (seatIndex === -1) {
+    return `Sorry seat ${rowLetter}${seatNumber} is not available.`;
+  }
+
+  movie.availableSeats.splice(seatIndex, 1);
+  return `Seat ${rowLetter}${seatNumber} was booked successfully!`;
+}
+
+function checkSeatAvailability(
+  movieId: number,
+  rowLetter: string,
+  seatNumber: number,
+): boolean {
+  const movie = findMovie(movieId);
+  if (!movie) return false;
+
+  return movie.availableSeats.some(
+    (seat) => seat[0] === rowLetter && seat[1] === seatNumber,
+  );
 }
 
 // Test cases (Create more if needed)
-console.log(addMovie(1, "Avengers", MovieGenre.Action, [["A", 1], ["A", 2]])) // { movieId: 1, title: "Avengers", genre: MovieGenre.Action, availableSeats: [["A", 1], ["A", 2]] }
-console.log(bookSeat(1, "A", 1)) // "Seat A1 booked successfully"
-console.log(checkSeatAvailability(1, "A", 1)) // false
+console.log(
+  addMovie(1, 'Avengers', MovieGenre.Action, [
+    ['A', 1],
+    ['A', 2],
+  ]),
+); // { movieId: 1, title: "Avengers", genre: MovieGenre.Action, availableSeats: [["A", 1], ["A", 2]] }
+console.log(bookSeat(1, 'A', 1)); // "Seat A1 booked successfully"
+console.log(checkSeatAvailability(1, 'A', 1)); // false
+
+console.log(
+  addMovie(2, 'Lilo & Stitch', MovieGenre.Animation, [
+    ['B', 1],
+    ['B', 2],
+  ]),
+);
+console.log(bookSeat(2, 'C', 1));
+console.log(checkSeatAvailability(2, 'B', 1));
